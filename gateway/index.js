@@ -1,36 +1,51 @@
-const express = require("express");
-const axios = require("axios");
+const express = require('express');
+const { createProxyMiddleware } = require('http-proxy-middleware');
+const path = require('path');
+
 const app = express();
-app.use(express.json());
 
-// Redirigir a Auth Service
-app.use("/auth", (req, res) => {
-    axios({
-        method: req.method,
-        url: `http://localhost:3001${req.url}`,
-        data: req.body
-    }).then(response => res.json(response.data))
-    .catch(error => res.status(error.response?.status || 500).json(error.response?.data || "Error"));
+// Middleware para servir archivos estáticos (opcional)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Página de inicio
+app.get('/', (req, res) => {
+    res.send(`
+        <html>
+            <head>
+                <title>Microservicios Gateway</title>
+            </head>
+            <body>
+                <h1>Bienvenido al Gateway de Microservicios</h1>
+                <ul>
+                    <li><a href="/auth/register">Registrar Usuario</a></li>
+                    <li><a href="/auth/login">Iniciar Sesión</a></li>
+                    <li><a href="/user/profile">Crear Perfil</a></li>
+                    <li><a href="/booking/book">Reservar</a></li>
+                </ul>
+            </body>
+        </html>
+    `);
 });
 
-// Redirigir a User Service
-app.use("/user", (req, res) => {
-    axios({
-        method: req.method,
-        url: `http://localhost:3002${req.url}`,
-        data: req.body
-    }).then(response => res.json(response.data))
-    .catch(error => res.status(error.response?.status || 500).json(error.response?.data || "Error"));
-});
+// Redirige las peticiones de /auth al Auth Service
+app.use('/auth', createProxyMiddleware({
+    target: 'http://localhost:3001', // Puerto donde corre el Auth Service
+    changeOrigin: true,
+}));
 
-// Redirigir a Booking Service
-app.use("/booking", (req, res) => {
-    axios({
-        method: req.method,
-        url: `http://localhost:3003${req.url}`,
-        data: req.body
-    }).then(response => res.json(response.data))
-    .catch(error => res.status(error.response?.status || 500).json(error.response?.data || "Error"));
-});
+// Redirige las peticiones de /user al User Service
+app.use('/user', createProxyMiddleware({
+    target: 'http://localhost:3002', // Puerto donde corre el User Service
+    changeOrigin: true,
+}));
 
-app.listen(3000, () => console.log("Gateway corriendo en el puerto 3000"));
+// Redirige las peticiones de /booking al Booking Service
+app.use('/booking', createProxyMiddleware({
+    target: 'http://localhost:3003', // Puerto donde corre el Booking Service
+    changeOrigin: true,
+}));
+
+// Inicia el servidor en el puerto 3000
+app.listen(3000, () => {
+    console.log('Gateway corriendo en http://localhost:3000');
+});

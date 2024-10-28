@@ -1,30 +1,33 @@
-const express = require("express");
+const express = require('express');
+const bodyParser = require('body-parser');
+
 const app = express();
-app.use(express.json());
+app.use(bodyParser.json());
 
-let profiles = []; // Array de perfiles de usuario
-
-// Obtener perfil de usuario
-app.get("/profile/:username", (req, res) => {
-    const { username } = req.params;
-    const profile = profiles.find(p => p.username === username);
-    if (profile) {
-        res.status(200).json(profile);
-    } else {
-        res.status(404).json({ error: "Perfil no encontrado" });
-    }
+// Página de crear perfil
+app.get('/profile', (req, res) => {
+    res.send(`
+        <html>
+            <head><title>Crear Perfil</title></head>
+            <body>
+                <h1>Crear Perfil</h1>
+                <form method="POST" action="/profile">
+                    <label for="username">Nombre de Usuario:</label>
+                    <input type="text" id="username" name="username" required><br>
+                    <label for="bio">Biografía:</label>
+                    <textarea id="bio" name="bio" required></textarea><br>
+                    <button type="submit">Crear Perfil</button>
+                </form>
+            </body>
+        </html>
+    `);
 });
 
-// Crear o actualizar perfil
-app.post("/profile", (req, res) => {
-    const { username, bio } = req.body;
-    const profileIndex = profiles.findIndex(p => p.username === username);
-    if (profileIndex > -1) {
-        profiles[profileIndex].bio = bio;
-    } else {
-        profiles.push({ username, bio });
-    }
-    res.status(201).json({ message: "Perfil creado/actualizado" });
+app.post('/profile', (req, res) => {
+    // Código para crear/actualizar el perfil
+    res.send('Perfil creado con éxito.');
 });
 
-app.listen(3002, () => console.log("User Service corriendo en el puerto 3002"));
+app.listen(3002, () => {
+    console.log('User Service corriendo en http://localhost:3002');
+});

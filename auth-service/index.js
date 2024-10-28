@@ -1,28 +1,57 @@
-const express = require("express");
+const express = require('express');
+const bodyParser = require('body-parser');
+
 const app = express();
-app.use(express.json());
+app.use(bodyParser.json());
 
-let users = []; // Array de usuarios para esta demo
-
-// Registro
-app.post("/register", (req, res) => {
-    const { username, password } = req.body;
-    if (users.find(u => u.username === username)) {
-        return res.status(400).json({ error: "Usuario ya registrado" });
-    }
-    users.push({ username, password });
-    res.status(201).json({ message: "Usuario registrado exitosamente" });
+// Página de registro
+app.get('/register', (req, res) => {
+    res.send(`
+        <html>
+            <head><title>Registrar Usuario</title></head>
+            <body>
+                <h1>Registrar Usuario</h1>
+                <form method="POST" action="/register">
+                    <label for="username">Nombre de Usuario:</label>
+                    <input type="text" id="username" name="username" required><br>
+                    <label for="password">Contraseña:</label>
+                    <input type="password" id="password" name="password" required><br>
+                    <button type="submit">Registrar</button>
+                </form>
+            </body>
+        </html>
+    `);
 });
 
-// Login
-app.post("/login", (req, res) => {
-    const { username, password } = req.body;
-    const user = users.find(u => u.username === username && u.password === password);
-    if (user) {
-        res.status(200).json({ message: "Login exitoso" });
-    } else {
-        res.status(401).json({ error: "Credenciales incorrectas" });
-    }
+app.post('/register', (req, res) => {
+    // Código para registrar el usuario
+    res.send('Usuario registrado con éxito.');
 });
 
-app.listen(3001, () => console.log("Auth Service corriendo en el puerto 3001"));
+// Página de inicio de sesión
+app.get('/login', (req, res) => {
+    res.send(`
+        <html>
+            <head><title>Iniciar Sesión</title></head>
+            <body>
+                <h1>Iniciar Sesión</h1>
+                <form method="POST" action="/login">
+                    <label for="username">Nombre de Usuario:</label>
+                    <input type="text" id="username" name="username" required><br>
+                    <label for="password">Contraseña:</label>
+                    <input type="password" id="password" name="password" required><br>
+                    <button type="submit">Iniciar Sesión</button>
+                </form>
+            </body>
+        </html>
+    `);
+});
+
+app.post('/login', (req, res) => {
+    // Código para iniciar sesión
+    res.send('Iniciado sesión con éxito.');
+});
+
+app.listen(3001, () => {
+    console.log('Auth Service corriendo en http://localhost:3001');
+});
